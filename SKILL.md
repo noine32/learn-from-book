@@ -14,6 +14,8 @@ description: プログラミング技術書PDFから技術を1つずつ「実装
 ## 手順（node ランタイム）
 
 1. **抽出**: PDF をテキスト抽出（スキャン/画像PDFは非対応と明示）。**人が抽出結果を目視**してから進む。
+   - ⚠ 日本語（Adobe-Japan1 等の CID フォント）PDFは `pdftotext`(poppler) だと文字化けする。**PyMuPDF(`pip install pymupdf`)推奨**（`fitz` で `page.get_text()`）。
+   - ⚠ **設定・命名規則・ショートカット・コメント等の"慣習/practice"系は実行検証の対象外**（テストで pass/fail を作れない）。検証できるのは「コードで観測可能な振る舞いを持つ技術」のみ。それ以外は該当なしとして扱う。
 2. **backlog 化**: 技術候補を1件=1行で台帳化。**1技術 = 独立に真偽判定できる1つの検証可能な主張**（章やコードブロック単位ではない）。schema: `{ id, name, source, claim, experimentIdea, runtime, dependsOn, status }`。dedup は正規化名（`src/ledger.ts`）。
 3. **実験**: 各技術ごとに作業ディレクトリ（例 `learning-lab/<book>/<technique>/`）に `impl.ts` と `impl.test.ts` を書く。テストは **§6 規約**に従う:
    - `./impl` を import している（ハードコード値を assert するだけの自作自演は不可）
@@ -35,8 +37,22 @@ description: プログラミング技術書PDFから技術を1つずつ「実装
 
 ## excel-vba ランタイム（Windows専用・対応済み）
 
-- 技術ディレクトリ構成: `impl.bas`（`Attribute VB_Name` 付き・1モジュール1 Function）＋ `cases.json`（`{ "fn": <名前>, "cases": [{ "args": [...], "expect": <値> }] }`）。
-- 検証: `npx tsx src/cli.ts <dir>` が `impl.bas` を検出して excel-vba で実行。**新規Excelインスタンスを生成**し `.bas` を Import→`Application.Run`→cases 照合、**ミューテーション（本体を sentinel 化）で negative-sanity** を確認。既存Excelは触らず、自分のインスタンスのみ後始末。
+- 技術ディレクトリ構成: `impl.bas`（`Attribute VB_Name` 付き・対象は Function または Sub）＋ `cases.json`。
+- `cases.json` スキーマ（`setup`/`expect`/`expectCells` は任意）:
+  ```json
+  {
+    "fn": "GetEndRow",
+    "cases": [
+      {
+        "setup": { "A1": 10, "A2": 20 },     // 実行前にセルへ値を書く（ワークシート操作系に必須）
+        "args":  [ 5, { "range": "A1" } ],   // スカラ、または { "range": "アドレス" } で Range を渡す
+        "expect": 5,                          // 戻り値の期待値（任意）
+        "expectCells": { "B1": "done" }       // 実行後のセル状態の期待値（副作用系。任意）
+      }
+    ]
+  }
+  ```
+- 検証: `npx tsx src/cli.ts <dir>` が `impl.bas` を検出して excel-vba で実行。**新規Excelインスタンスを生成**し `.bas` を Import→ケースごとにシート初期化→`setup`書込→`Application.Run`（Range引数対応）→`expect`/`expectCells`照合、**型対応ミューテーション（Function=戻り値 sentinel／Sub=空本体）で negative-sanity** を確認。既存Excelは触らず自分のインスタンスのみ後始末。VBA実行時エラーのハングは timeout ガードで fail 化。
 - 前提: AccessVBOM（VBAプロジェクトへのアクセスを信頼）有効。Mac では実行不可（読む/参照のみ）。
 
 ## 参考
