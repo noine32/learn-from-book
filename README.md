@@ -48,6 +48,11 @@ A technique's test must follow the §6 rules (see `SKILL.md`): import `./impl`, 
 least once, and genuinely exercise the implementation (the harness mutates the impl and
 requires the test to then fail).
 
+## Demos
+
+See [`docs/DEMO.md`](docs/DEMO.md) for verified techniques across both runtimes
+(higher-order JS functions and Excel/VBA utilities), each verified by execution.
+
 ## Status
 
 - **Node runtime:** working.
