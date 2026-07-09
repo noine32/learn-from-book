@@ -55,4 +55,11 @@ describe.runIf(isWin)('verifyVbaTechnique (Windows / Excel COM)', () => {
     expect(r.verified).toBe(true);
     expect(r.negativeSanityHeld).toBe(true);
   }, 90000);
+
+  // 副作用系（Sub がセルを書き換える → expectCells で検証）
+  it('verifies a side-effect Sub (DoubleRange) via expected cell state', async () => {
+    const r = await verifyVbaTechnique(join(here, '..', '..', 'demo', 'vba-double-range'));
+    expect(r.verified).toBe(true);
+    expect(r.negativeSanityHeld).toBe(true);
+  }, 90000);
 });

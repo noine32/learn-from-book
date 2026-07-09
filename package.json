@@ -7,7 +7,7 @@
   "engines": { "node": ">=22" },
   "scripts": {
     "test": "vitest run",
-    "test:node": "vitest run tests/ledger.test.ts tests/verify.test.ts tests/adapters/node.test.ts tests/adapters/python.test.ts tests/demos/",
+    "test:node": "vitest run tests/ledger.test.ts tests/verify.test.ts tests/adapters/node.test.ts tests/adapters/python.test.ts tests/adapters/run-ps1-ascii.test.ts tests/demos/",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },

@@ -1,0 +1,10 @@
+{
+  "fn": "DoubleRange",
+  "cases": [
+    {
+      "setup": { "A1": 1, "A2": 2, "A3": 3 },
+      "args": [{ "range": "A1:A3" }],
+      "expectCells": { "A1": 2, "A2": 4, "A3": 6 }
+    }
+  ]
+}

@@ -53,6 +53,7 @@ npx tsx src/cli.ts demo/py-fib
 | `demo/vba-sort-array` | SortArray1D(arr): ascending sort (Variant array in/out) | ✅ |
 | `demo/vba-unique-array` | UniqueArray1D(arr): distinct values, first-seen order (Variant array in/out) | ✅ |
 | `demo/vba-sum-matrix` | SumMatrix(arr2d): sum of all cells (2‑D Variant array in) | ✅ |
+| `demo/vba-double-range` | DoubleRange(rng): double each cell in place (Sub side effect, verified via expected cell state) | ✅ |
 
 The VBA runner injects the `.bas` into a fresh Excel instance, runs each case via
 `Application.Run` (with cell fixtures / Range args / array args), checks results,

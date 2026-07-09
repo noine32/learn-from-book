@@ -50,7 +50,7 @@ try {
   foreach ($c in $cases.cases) {
     $ws.Cells.Clear() | Out-Null
     if (Test-HasProp $c 'setup') {
-      foreach ($p in $c.setup.PSObject.Properties) { $ws.Range($p.Name).Value = $p.Value }
+      foreach ($p in $c.setup.PSObject.Properties) { $ws.Range($p.Name).Value2 = $p.Value }
     }
 
     # Build args. Do NOT wrap $c.args in @() -- that flattens a nested array argument.
@@ -92,7 +92,9 @@ try {
     }
     if ($casePass -and (Test-HasProp $c 'expectCells')) {
       foreach ($p in $c.expectCells.PSObject.Properties) {
-        $cellVal = $ws.Range($p.Name).Value
+        # Use .Value2 (non-parameterized). .Value is a parameterized property and
+        # PowerShell may return its descriptor object instead of the cell value.
+        $cellVal = $ws.Range($p.Name).Value2
         if ("$cellVal" -ne "$($p.Value)") {
           $casePass = $false
           Write-Output ("FAIL fn={0} cell={1} expect={2} actual={3}" -f $fn, $p.Name, $p.Value, $cellVal)
