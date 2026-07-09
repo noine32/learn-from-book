@@ -7,9 +7,10 @@ implementation, has assertions, and **fails when the implementation is mutated**
 (so tautological / echo tests are rejected).
 
 All implementations here are **independently authored** (universal algorithms and
-idioms). The JavaScript techniques reproduce higher-order-function *concepts* from
-*Eloquent JavaScript* (CC BY-NC); no book text or book code is copied. VBA
-techniques are standard Excel idioms.
+idioms). The JavaScript techniques reproduce concepts covered by open resources —
+higher-order functions from *Eloquent JavaScript* (CC BY-NC) and classic algorithms
+in the style of *javascript-algorithms* (MIT) — but no book/source text or code is
+copied. VBA techniques are standard Excel idioms.
 
 ## Node runtime (`impl.ts` + `impl.test.ts`)
 
@@ -20,6 +21,10 @@ techniques are standard Excel idioms.
 | `demo/js-flatten` | flatten(arrays): concatenate one level of nesting | ✅ |
 | `demo/js-range` | range(start, end, step): inclusive numeric sequence | ✅ |
 | `demo/js-deep-equal` | deepEqual(a, b): structural equality by value | ✅ |
+| `demo/js-binary-search` | binarySearch(sorted, target): index or -1 | ✅ |
+| `demo/js-gcd` | gcd(a, b): greatest common divisor (Euclid) | ✅ |
+| `demo/js-is-palindrome` | isPalindrome(s): case/punctuation-insensitive | ✅ |
+| `demo/js-memoize` | memoize(fn): cache results per argument | ✅ |
 
 Run any of them:
 
