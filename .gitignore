@@ -3,3 +3,5 @@ learning-lab/
 books/
 *.pdf
 *.fugu-review.md
+*.mutated.bas
+
