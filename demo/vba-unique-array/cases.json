@@ -1,0 +1,7 @@
+{
+  "fn": "UniqueArray1D",
+  "cases": [
+    { "args": [[1, 2, 2, 3, 1]], "expectArray": [1, 2, 3] },
+    { "args": [["a", "b", "a"]], "expectArray": ["a", "b"] }
+  ]
+}

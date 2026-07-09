@@ -1,19 +1,15 @@
-# learn-from-book excel-vba runner (Windows-only, Excel COM).
-# Creates a NEW Excel instance, imports the .bas module, and runs each case.
-# It never touches other Excel instances: it cleans up only the instance it created.
+# learn-from-book excel-vba runner (Windows-only, Excel COM). ASCII comments only.
+# Creates a NEW Excel instance, imports the .bas module, runs each case.
+# Cleans up only the instance it created (never touches other Excel instances).
 #
-# cases.json schema (all fields optional except fn/cases/args):
-#   {
-#     "fn": "<procedure name>",
-#     "cases": [
-#       {
-#         "setup":       { "A1": 10, "A2": 20 },       # write values to cells first (optional)
-#         "args":        [ 5, { "range": "A1" } ],     # scalars, or {range:addr} to pass a Range
-#         "expect":      50,                            # expected return value (optional)
-#         "expectCells": { "B1": "done" }               # expected cell values after run (optional)
-#       }
-#     ]
-#   }
+# cases.json schema (setup / expect / expectCells / expectArray are optional):
+#   { "fn": "<name>", "cases": [ {
+#       "setup":       { "A1": 10, "A2": 20 },          # write cell values first
+#       "args":        [ 5, { "range": "A1" }, [1,2] ], # scalar / Range ref / array (Variant array)
+#       "expect":      50,                               # expected scalar return
+#       "expectCells": { "B1": "done" },                # expected cell values after run (side effects)
+#       "expectArray": [1, 2, 3]                         # expected 1D array return (order-sensitive)
+#   } ] }
 # Usage: powershell -NoProfile -ExecutionPolicy Bypass -File run.ps1 -BasFile <impl.bas> -CasesFile <cases.json>
 # Output: ALL_PASS / SOME_FAIL / ERROR:... ; exit 0 (all match) / 1 (mismatch or error).
 [CmdletBinding()]
@@ -52,17 +48,18 @@ try {
   $ws = $wb.Worksheets.Item(1)
 
   foreach ($c in $cases.cases) {
-    # Fresh worksheet state per case.
     $ws.Cells.Clear() | Out-Null
     if (Test-HasProp $c 'setup') {
       foreach ($p in $c.setup.PSObject.Properties) { $ws.Range($p.Name).Value = $p.Value }
     }
 
-    # Build args: scalars pass through; { "range": "addr" } becomes a Range object.
+    # Build args. Do NOT wrap $c.args in @() -- that flattens a nested array argument.
     $callArgs = New-Object System.Collections.ArrayList
     [void]$callArgs.Add($fn)
-    foreach ($a in @($c.args)) {
-      if ((Test-HasProp $a 'range')) {
+    foreach ($a in $c.args) {
+      if ($a -is [System.Array]) {
+        [void]$callArgs.Add([object[]]$a)             # pass as one Variant array (SAFEARRAY)
+      } elseif ((Test-HasProp $a 'range')) {
         [void]$callArgs.Add($ws.Range([string]$a.range))
       } else {
         [void]$callArgs.Add($a)
@@ -93,6 +90,14 @@ try {
         }
       }
     }
+    if ($casePass -and (Test-HasProp $c 'expectArray')) {
+      $actualJoined = ((@($actual) | ForEach-Object { "$_" }) -join '|')
+      $expJoined = ((@($c.expectArray) | ForEach-Object { "$_" }) -join '|')
+      if ($actualJoined -ne $expJoined) {
+        $casePass = $false
+        Write-Output ("FAIL fn={0} expectArray=[{1}] actual=[{2}]" -f $fn, $expJoined, $actualJoined)
+      }
+    }
 
     if (-not $casePass) { $allPass = $false }
   }
@@ -113,7 +118,6 @@ finally {
   [System.GC]::WaitForPendingFinalizers()
   [System.GC]::Collect()
   [System.GC]::WaitForPendingFinalizers()
-  # Last-resort: if our own instance survived, kill only that PID (never other Excel).
   if ($excelPid) {
     $p = Get-Process -Id $excelPid -ErrorAction SilentlyContinue
     if ($null -ne $p -and $p.ProcessName -eq 'EXCEL') { Stop-Process -Id $excelPid -Force -ErrorAction SilentlyContinue }

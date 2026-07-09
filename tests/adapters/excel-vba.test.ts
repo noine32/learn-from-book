@@ -6,6 +6,8 @@ import { mutateBas, verifyVbaTechnique } from '../../src/adapters/excel-vba.ts';
 const here = dirname(fileURLToPath(import.meta.url));
 const demo = join(here, '..', '..', 'demo', 'vba-reverse');
 const demoCells = join(here, '..', '..', 'demo', 'vba-get-end-row');
+const demoSort = join(here, '..', '..', 'demo', 'vba-sort-array');
+const demoUnique = join(here, '..', '..', 'demo', 'vba-unique-array');
 const isWin = process.platform === 'win32';
 
 describe('mutateBas', () => {
@@ -30,6 +32,19 @@ describe.runIf(isWin)('verifyVbaTechnique (Windows / Excel COM)', () => {
   // ワークシート操作系（Range引数＋セル事前設定＋戻り値照合）— 拡張スキーマ
   it('verifies a worksheet/Range technique (GetEndRow) with cell setup', async () => {
     const r = await verifyVbaTechnique(demoCells);
+    expect(r.verified).toBe(true);
+    expect(r.negativeSanityHeld).toBe(true);
+  }, 90000);
+
+  // 配列 in/out（Variant配列引数＋expectArray照合）
+  it('verifies an array technique (SortArray1D)', async () => {
+    const r = await verifyVbaTechnique(demoSort);
+    expect(r.verified).toBe(true);
+    expect(r.negativeSanityHeld).toBe(true);
+  }, 90000);
+
+  it('verifies an array technique (UniqueArray1D)', async () => {
+    const r = await verifyVbaTechnique(demoUnique);
     expect(r.verified).toBe(true);
     expect(r.negativeSanityHeld).toBe(true);
   }, 90000);

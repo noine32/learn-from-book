@@ -1,0 +1,7 @@
+{
+  "fn": "SortArray1D",
+  "cases": [
+    { "args": [[3, 1, 2]], "expectArray": [1, 2, 3] },
+    { "args": [[5, 4, 4, 1]], "expectArray": [1, 4, 4, 5] }
+  ]
+}
