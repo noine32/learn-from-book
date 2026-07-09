@@ -1,0 +1,11 @@
+{
+  "name": "learn-from-book",
+  "version": "0.1.0",
+  "description": "Experiential learning pipeline: read a programming book, implement, verify by test (mutation-checked), and accumulate verified skills. Node, Python, and Excel/VBA runtimes.",
+  "author": {
+    "name": "noine32",
+    "url": "https://github.com/noine32"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/noine32/learn-from-book"
+}

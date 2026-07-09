@@ -1,5 +1,9 @@
 # learn-from-book
 
+[![CI](https://github.com/noine32/learn-from-book/actions/workflows/ci.yml/badge.svg)](https://github.com/noine32/learn-from-book/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)
+
 An experiential learning pipeline for AI coding agents: read a programming book,
 **implement each technique, verify it by running a test, and only then accumulate it**
 as a reusable skill. The goal is to move past "I read it" to "I verified I understand it."
@@ -20,7 +24,7 @@ environment and an allow-listed set of packages.
 
 ## What is / isn't in this repo
 
-- **In (public):** the orchestrator skill (`SKILL.md`), the verification harness and
+- **In (public):** the orchestrator skill (`skills/learn-from-book/SKILL.md`), the verification harness and
   runtime adapters (`src/`), tests, and a self-authored copyright-free demo (`demo/`).
 - **Never in (keep private):** book PDFs or their text, the per-technique skills/knowledge
   learned from a book (they can be derivative works), and your `learning-lab/` outputs.
@@ -45,14 +49,24 @@ npx tsx src/cli.ts demo/vba-reverse   # VBA technique (impl.bas + cases.json), W
 
 `src/cli.ts` prints a `VerifyResult` JSON and exits 0 when `verified`, 1 otherwise.
 
-A technique's test must follow the §6 rules (see `SKILL.md`): import `./impl`, assert at
+A technique's test must follow the §6 rules (see `skills/learn-from-book/SKILL.md`): import `./impl`, assert at
 least once, and genuinely exercise the implementation (the harness mutates the impl and
 requires the test to then fail).
 
 ## Demos
 
-See [`docs/DEMO.md`](docs/DEMO.md) for verified techniques across both runtimes
-(higher-order JS functions and Excel/VBA utilities), each verified by execution.
+See [`docs/DEMO.md`](docs/DEMO.md) for verified techniques across all three runtimes
+(Node/TypeScript, Python/pytest, and Excel/VBA), each verified by execution.
+
+## Install as a Claude Code plugin
+
+The orchestrator skill lives at `skills/learn-from-book/SKILL.md`. You can add this
+repo as a single-plugin marketplace:
+
+```
+/plugin marketplace add noine32/learn-from-book
+/plugin install learn-from-book@learn-from-book
+```
 
 ## Status
 

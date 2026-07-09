@@ -1,0 +1,14 @@
+{
+  "name": "learn-from-book",
+  "owner": {
+    "name": "noine32",
+    "url": "https://github.com/noine32"
+  },
+  "plugins": [
+    {
+      "name": "learn-from-book",
+      "source": "./",
+      "description": "Verify book techniques by executing tests (mutation-checked) across Node, Python, and Excel/VBA."
+    }
+  ]
+}
