@@ -32,6 +32,18 @@ Run any of them:
 npx tsx src/cli.ts demo/js-deep-equal
 ```
 
+## Python runtime (`impl.py` + `test_impl.py`, verified with pytest)
+
+| Technique | What it does | Verified |
+|-----------|--------------|----------|
+| `demo/py-anagram` | is_anagram(a, b): case-insensitive anagram check | ✅ |
+| `demo/py-word-frequency` | word_frequency(text): word → count dict | ✅ |
+| `demo/py-fib` | fib(n): nth Fibonacci number (iterative) | ✅ |
+
+```bash
+npx tsx src/cli.ts demo/py-fib
+```
+
 ## Excel/VBA runtime (Windows-only; `impl.bas` + `cases.json`)
 
 | Technique | What it does | Verified |

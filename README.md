@@ -39,6 +39,7 @@ npm test                                  # run the harness's own test suite
 
 # verify one technique directory (runtime auto-detected)
 npx tsx src/cli.ts demo/debounce      # node technique (impl.ts + impl.test.ts)
+npx tsx src/cli.ts demo/py-fib        # Python technique (impl.py + test_impl.py), pytest
 npx tsx src/cli.ts demo/vba-reverse   # VBA technique (impl.bas + cases.json), Windows/Excel only
 ```
 
@@ -56,6 +57,7 @@ See [`docs/DEMO.md`](docs/DEMO.md) for verified techniques across both runtimes
 ## Status
 
 - **Node runtime:** working.
+- **Python runtime:** working — runs `test_impl.py` with pytest and applies the same mutation-based negative-sanity check.
 - **Excel/VBA runtime (Windows-only):** working — injects a `.bas` into a fresh Excel
   instance via COM, runs cases with `Application.Run`, and applies the same
   mutation-based negative-sanity check. Cleans up only its own Excel instance.
