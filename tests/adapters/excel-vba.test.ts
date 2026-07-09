@@ -5,6 +5,7 @@ import { mutateBas, verifyVbaTechnique } from '../../src/adapters/excel-vba.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const demo = join(here, '..', '..', 'demo', 'vba-reverse');
+const demoCells = join(here, '..', '..', 'demo', 'vba-get-end-row');
 const isWin = process.platform === 'win32';
 
 describe('mutateBas', () => {
@@ -23,6 +24,13 @@ describe.runIf(isWin)('verifyVbaTechnique (Windows / Excel COM)', () => {
     const r = await verifyVbaTechnique(demo);
     expect(r.verified).toBe(true);
     expect(r.passed).toBe(true);
+    expect(r.negativeSanityHeld).toBe(true);
+  }, 90000);
+
+  // ワークシート操作系（Range引数＋セル事前設定＋戻り値照合）— 拡張スキーマ
+  it('verifies a worksheet/Range technique (GetEndRow) with cell setup', async () => {
+    const r = await verifyVbaTechnique(demoCells);
+    expect(r.verified).toBe(true);
     expect(r.negativeSanityHeld).toBe(true);
   }, 90000);
 });

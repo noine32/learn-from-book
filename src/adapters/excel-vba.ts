@@ -14,9 +14,21 @@ export function isWindows(): boolean {
  * VBA の対象 Function の本体を sentinel 代入へ置換する（negative-sanity 用ミューテーション）。
  * `Function <fn>(...) ... End Function` の本体を `<fn> = "___MUTATED_SENTINEL___"` に差し替える。
  */
+const NUMERIC_RETURN_TYPES = ['long', 'integer', 'double', 'single', 'byte', 'currency', 'decimal', 'longlong'];
+
 export function mutateBas(basSrc: string, fn: string): string {
-  const re = new RegExp(`(Function\\s+${fn}\\s*\\([^)]*\\)[^\\n]*\\n)([\\s\\S]*?)(End Function)`, 'i');
-  return basSrc.replace(re, `$1    ${fn} = "${SENTINEL}"\n$3`);
+  // Function: 本体を sentinel 代入に置換。戻り値型に合わせる
+  // （数値関数へ文字列 sentinel を入れると VBA 実行時エラー→非表示Excelでダイアログ・ハングの元になるため）。
+  const funcRe = new RegExp(`(Function\\s+${fn}\\s*\\([^)]*\\)([^\\n]*)\\n)([\\s\\S]*?)(End Function)`, 'i');
+  const m = funcRe.exec(basSrc);
+  if (m) {
+    const retType = (m[2].match(/As\s+(\w+)/i)?.[1] ?? '').toLowerCase();
+    const sentinel = NUMERIC_RETURN_TYPES.includes(retType) ? '-987654321' : `"${SENTINEL}"`;
+    return basSrc.replace(funcRe, `$1    ${fn} = ${sentinel}\n$4`);
+  }
+  // Sub: 本体を空にする（副作用が消える → expectCells 不一致で落ちる）。
+  const subRe = new RegExp(`(Sub\\s+${fn}\\s*\\([^)]*\\)[^\\n]*\\n)([\\s\\S]*?)(End Sub)`, 'i');
+  return basSrc.replace(subRe, `$1$3`);
 }
 
 /** run.ps1 を実行。全ケース一致(exit 0)なら true。 */
@@ -25,7 +37,8 @@ function runPs1(basFile: string, casesFile: string): boolean {
     execFileSync(
       'powershell.exe',
       ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', RUN_PS1, '-BasFile', basFile, '-CasesFile', casesFile],
-      { cwd: process.cwd(), stdio: 'ignore' },
+      // timeout: VBA実行時エラーで非表示Excelがダイアログ待ちハングした場合の保険（超過で kill→false）。
+      { cwd: process.cwd(), stdio: 'ignore', timeout: 60000, windowsHide: true },
     );
     return true;
   } catch {

@@ -1,0 +1,7 @@
+{
+  "fn": "GetEndRow",
+  "cases": [
+    { "setup": { "A1": 10, "A2": 20, "A3": 30, "A4": 40, "A5": 50 }, "args": [{ "range": "A1" }], "expect": 5 },
+    { "setup": { "A1": 1, "A2": 2 }, "args": [{ "range": "A1" }], "expect": 2 }
+  ]
+}
