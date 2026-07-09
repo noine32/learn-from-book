@@ -1,0 +1,8 @@
+{
+  "fn": "ReverseString",
+  "cases": [
+    { "args": ["abc"], "expect": "cba" },
+    { "args": [""], "expect": "" },
+    { "args": ["Hello"], "expect": "olleH" }
+  ]
+}
