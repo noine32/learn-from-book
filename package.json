@@ -7,7 +7,9 @@
   "engines": { "node": ">=22" },
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:node": "vitest run tests/ledger.test.ts tests/verify.test.ts tests/adapters/node.test.ts tests/demos/",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^22.7.0",
