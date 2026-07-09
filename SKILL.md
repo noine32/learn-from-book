@@ -32,7 +32,12 @@ description: プログラミング技術書PDFから技術を1つずつ「実装
 
 - **本のPDF/本文/本由来の個別 skill・knowledge を、このリポジトリに絶対コミットしない**（`.gitignore` で `learning-lab/`・`*.pdf`・`books/` 除外）。
 - **生成コードは実行前にレビュー**する（作業ディレクトリ隔離であって実行隔離ではない。任意コードがユーザ権限で走る）。
-- excel-vba ランタイムは将来（Windows専用・別計画）。
+
+## excel-vba ランタイム（Windows専用・対応済み）
+
+- 技術ディレクトリ構成: `impl.bas`（`Attribute VB_Name` 付き・1モジュール1 Function）＋ `cases.json`（`{ "fn": <名前>, "cases": [{ "args": [...], "expect": <値> }] }`）。
+- 検証: `npx tsx src/cli.ts <dir>` が `impl.bas` を検出して excel-vba で実行。**新規Excelインスタンスを生成**し `.bas` を Import→`Application.Run`→cases 照合、**ミューテーション（本体を sentinel 化）で negative-sanity** を確認。既存Excelは触らず、自分のインスタンスのみ後始末。
+- 前提: AccessVBOM（VBAプロジェクトへのアクセスを信頼）有効。Mac では実行不可（読む/参照のみ）。
 
 ## 参考
 

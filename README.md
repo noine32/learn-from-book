@@ -37,8 +37,9 @@ environment and an allow-listed set of packages.
 npm install
 npm test                                  # run the harness's own test suite
 
-# verify one technique directory (must contain impl.ts and impl.test.ts)
-npx tsx src/cli.ts demo/debounce
+# verify one technique directory (runtime auto-detected)
+npx tsx src/cli.ts demo/debounce      # node technique (impl.ts + impl.test.ts)
+npx tsx src/cli.ts demo/vba-reverse   # VBA technique (impl.bas + cases.json), Windows/Excel only
 ```
 
 `src/cli.ts` prints a `VerifyResult` JSON and exits 0 when `verified`, 1 otherwise.
@@ -49,8 +50,10 @@ requires the test to then fail).
 
 ## Status
 
-- **Node runtime:** working (this repo).
-- **Excel/VBA runtime (Windows-only):** planned (separate plan).
+- **Node runtime:** working.
+- **Excel/VBA runtime (Windows-only):** working — injects a `.bas` into a fresh Excel
+  instance via COM, runs cases with `Application.Run`, and applies the same
+  mutation-based negative-sanity check. Cleans up only its own Excel instance.
 
 ## License
 
