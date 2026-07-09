@@ -52,6 +52,7 @@ npx tsx src/cli.ts demo/py-fib
 | `demo/vba-get-end-row` | GetEndRow(startCell): last data row in a column (Range + worksheet setup) | ✅ |
 | `demo/vba-sort-array` | SortArray1D(arr): ascending sort (Variant array in/out) | ✅ |
 | `demo/vba-unique-array` | UniqueArray1D(arr): distinct values, first-seen order (Variant array in/out) | ✅ |
+| `demo/vba-sum-matrix` | SumMatrix(arr2d): sum of all cells (2‑D Variant array in) | ✅ |
 
 The VBA runner injects the `.bas` into a fresh Excel instance, runs each case via
 `Application.Run` (with cell fixtures / Range args / array args), checks results,
@@ -60,6 +61,7 @@ Excel instance.
 
 ## Coverage
 
-These demos exercise four technique shapes the harness supports:
-pure functions, worksheet/Range operations, 1‑D array in/out, and higher‑order
-functions — each verified by execution rather than by summary.
+These demos span three runtimes (Node/TypeScript, Python/pytest, Excel/VBA) and
+several technique shapes: pure functions, higher‑order functions, worksheet/Range
+operations, and 1‑D / 2‑D array in/out — each verified by execution rather than by
+summary.

@@ -48,4 +48,11 @@ describe.runIf(isWin)('verifyVbaTechnique (Windows / Excel COM)', () => {
     expect(r.verified).toBe(true);
     expect(r.negativeSanityHeld).toBe(true);
   }, 90000);
+
+  // 2次元配列（jagged JSON -> 2D Variant array）
+  it('verifies a 2D array technique (SumMatrix)', async () => {
+    const r = await verifyVbaTechnique(join(here, '..', '..', 'demo', 'vba-sum-matrix'));
+    expect(r.verified).toBe(true);
+    expect(r.negativeSanityHeld).toBe(true);
+  }, 90000);
 });

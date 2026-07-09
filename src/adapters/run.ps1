@@ -57,8 +57,17 @@ try {
     $callArgs = New-Object System.Collections.ArrayList
     [void]$callArgs.Add($fn)
     foreach ($a in $c.args) {
-      if ($a -is [System.Array]) {
-        [void]$callArgs.Add([object[]]$a)             # pass as one Variant array (SAFEARRAY)
+      if ($a -is [System.Array] -and $a.Count -gt 0 -and $a[0] -is [System.Array]) {
+        # 2D jagged JSON array -> 2D Variant array (SAFEARRAY rank 2)
+        $rows = $a.Count
+        $cols = ($a[0]).Count
+        $m = New-Object 'object[,]' $rows, $cols
+        for ($ri = 0; $ri -lt $rows; $ri++) {
+          for ($ci = 0; $ci -lt $cols; $ci++) { $m[$ri, $ci] = $a[$ri][$ci] }
+        }
+        [void]$callArgs.Add($m)
+      } elseif ($a -is [System.Array]) {
+        [void]$callArgs.Add([object[]]$a)             # 1D Variant array (SAFEARRAY rank 1)
       } elseif ((Test-HasProp $a 'range')) {
         [void]$callArgs.Add($ws.Range([string]$a.range))
       } else {
