@@ -55,6 +55,17 @@ npx tsx src/cli.ts demo/py-fib
 npx tsx src/cli.ts demo/go-sum
 ```
 
+## Rust runtime (`Cargo.toml` + `src/lib.rs` + `tests/integration.rs`, verified with `cargo test`)
+
+| Technique | What it does | Verified |
+|-----------|--------------|----------|
+| `demo/rust-reverse` | reverse_string(s): reverse a string | ✅ |
+| `demo/rust-sum` | sum(nums): sum of an i32 slice | ✅ |
+
+```bash
+npx tsx src/cli.ts demo/rust-sum
+```
+
 ## Excel/VBA runtime (Windows-only; `impl.bas` + `cases.json`)
 
 | Technique | What it does | Verified |

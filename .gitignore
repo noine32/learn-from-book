@@ -7,3 +7,5 @@ books/
 
 __pycache__/
 *.pyc
+target/
+Cargo.lock
