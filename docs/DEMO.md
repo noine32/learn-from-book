@@ -2,6 +2,8 @@
 
 **日本語** | [English](./DEMO.en.md)
 
+<!-- このファイルは docs/demos.json から scripts/gen-demo.mjs で生成しています。手で編集せず `npm run gen:demo` を実行してください。 -->
+
 以下の各テクニックは `learn-from-book` の検証ハーネス（node は `src/verify.ts`、VBA は
 `src/adapters/run.ps1`）を通している。「検証済み(Verified)」とは、テクニックのテストが**成功**し、
 かつ §6 チェックを生き延びたことを意味する: 実装を import・使用し、assertion を持ち、
@@ -25,8 +27,6 @@ JavaScript のテクニックは公開資料でも扱われる概念を再現し
 | `demo/js-gcd` | gcd(a, b): 最大公約数（ユークリッド） | ✅ |
 | `demo/js-is-palindrome` | isPalindrome(s): 大小・記号を無視した回文判定 | ✅ |
 | `demo/js-memoize` | memoize(fn): 引数ごとに結果をキャッシュ | ✅ |
-
-いずれも次のように実行:
 
 ```bash
 npx tsx src/cli.ts demo/js-deep-equal

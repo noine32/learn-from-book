@@ -1,0 +1,30 @@
+name: Demo docs
+
+# docs/DEMO.md / docs/DEMO.en.md は docs/demos.json から生成する。
+# demos.json やデモを変更したのに DEMO ドキュメントを再生成し忘れると PR を落とす（ドリフト防止）。
+
+on:
+  pull_request:
+    paths:
+      - 'demo/**'
+      - 'docs/demos.json'
+      - 'scripts/gen-demo.mjs'
+      - 'docs/DEMO.md'
+      - 'docs/DEMO.en.md'
+  workflow_dispatch:
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm run gen:demo
+      - name: Check DEMO docs are in sync with docs/demos.json
+        run: |
+          if ! git diff --exit-code -- docs/DEMO.md docs/DEMO.en.md; then
+            echo "::error::docs/DEMO.md / docs/DEMO.en.md is out of sync with docs/demos.json. Run 'npm run gen:demo' and commit the result."
+            exit 1
+          fi

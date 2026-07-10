@@ -1,0 +1,63 @@
+name: Links
+
+# ドキュメントのリンク切れチェック。
+# - PR: 内部（相対）リンクのみをオフラインで検証（決定的・外部起因のフレーク無し）。
+# - 週次/手動: 外部リンクも含めてフル検証し、壊れていたら Issue を起票（外部リンク腐食の検知）。
+
+on:
+  pull_request:
+    paths: ['**/*.md', 'site/**']
+  schedule:
+    - cron: '0 1 * * 1'   # 毎週月曜 01:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # PR: 相対リンクだけを検証（外部 URL はスキップ＝安定）
+      - name: Link check (internal, PR)
+        if: github.event_name == 'pull_request'
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: "--offline --no-progress '**/*.md'"
+          fail: true
+
+      # 週次/手動: 外部リンクも含めて検証（壊れても job は落とさず Issue で通知）
+      - name: Link check (full, scheduled)
+        if: github.event_name != 'pull_request'
+        id: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: "--no-progress --accept 200,206,429 '**/*.md' 'site/**/*.html'"
+          fail: false
+
+      - name: Open issue on broken links (scheduled)
+        if: github.event_name == 'schedule' && steps.lychee.outputs.exit_code != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = 'Broken links found (scheduled link check)';
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = `The scheduled link check reported broken links.\n\nRun: ${runUrl}`;
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'links',
+            });
+            if (open.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body, labels: ['links', 'ci-failure'],
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: open[0].number, body,
+              });
+            }
