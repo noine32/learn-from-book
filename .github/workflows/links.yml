@@ -19,7 +19,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # PR: 相対リンクだけを検証（外部 URL はスキップ＝安定）
       - name: Link check (internal, PR)
