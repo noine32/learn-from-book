@@ -1,47 +1,59 @@
-# Contributing
+# コントリビュート
 
-Thanks for your interest! This project verifies learned techniques by **executing**
-them, so contributions center on adding techniques or runtimes.
+**日本語** | [English](./CONTRIBUTING.en.md)
 
-## Setup
+興味を持ってくれてありがとう！ 本プロジェクトは、学んだテクニックを**実行して**検証する。
+そのためコントリビュートは、テクニックやランタイムの追加が中心になる。
+
+## セットアップ
 
 ```bash
 npm install          # Node 22+
-npm run test:node    # node + python tests (fast; no Excel needed)
-npm test             # full suite (adds Excel/VBA tests on Windows)
+npm run test:node    # node + python テスト（速い; Excel 不要）
+npm test             # フルスイート（Windows では Excel/VBA テストも追加）
 npm run typecheck
 ```
 
-Python demos need `pytest` (`pip install pytest`). Excel/VBA demos need Windows +
-Excel with "Trust access to the VBA project object model" enabled.
+Python デモには `pytest`（`pip install pytest`）が必要。Excel/VBA デモには Windows +
+Excel と「VBA プロジェクトオブジェクトモデルへのアクセスを信頼する」を有効化したものが必要。
 
-## Adding a technique (demo)
+## テクニック（デモ）の追加
 
-Create a directory under `demo/<name>/` matching a runtime:
+`demo/<name>/` の下に、いずれかのランタイムに合致するディレクトリを作る:
 
-- **Node:** `impl.ts` + `impl.test.ts` (vitest). The test must `import './impl'` and assert real behavior.
-- **Python:** `impl.py` + `test_impl.py` (pytest). The test must `from impl import ...`.
-- **Excel/VBA:** `impl.bas` + `cases.json` (see `skills/learn-from-book/SKILL.md` for the schema).
+- **Node:** `impl.ts` + `impl.test.ts`（vitest）。テストは `import './impl'` して実挙動を assert する。
+- **Python:** `impl.py` + `test_impl.py`（pytest）。テストは `from impl import ...` する。
+- **Go:** `go.mod` + `impl.go` + `impl_test.go`（`go test`）。
+- **Rust:** `Cargo.toml` + `src/lib.rs` + `tests/integration.rs`（`cargo test`）。
+- **Excel/VBA:** `impl.bas` + `cases.json`（スキーマは `skills/learn-from-book/SKILL.md` 参照）。
 
-Verify it:
+検証:
 
 ```bash
 npx tsx src/cli.ts demo/<name>
 ```
 
-`verified` requires the §6 checks (see `skills/learn-from-book/SKILL.md`): the test
-imports/exercises the implementation, has assertions, and **fails when the
-implementation is mutated** (so tautological/echo tests are rejected).
+`verified` になるには §6 チェック（`skills/learn-from-book/SKILL.md` 参照）を満たす必要がある:
+テストが実装を import・使用し、assertion を持ち、**実装をミューテーションすると失敗する**
+（トートロジー／echo テストは棄却される）。
 
-## Rules
+## ルール
 
-- Implementations must be **independently authored**. Do not copy book/source text or code.
-- `src/adapters/run.ps1` must stay **ASCII-only** (a guard test enforces this — Windows PowerShell misreads non-ASCII).
-- Keep secrets and personal paths out of the repo; do not commit book PDFs (`.gitignore` covers `learning-lab/`, `*.pdf`, `books/`).
-- Add a test so CI (or the local suite) covers the new technique.
+- 実装は**独立に書き起こす**こと。書籍／出典の本文やコードをコピーしない。
+- `src/adapters/run.ps1` は**ASCII のみ**に保つ（ガードテストで強制——Windows PowerShell は非 ASCII を誤読する）。
+- リポジトリに秘密情報や個人パスを入れない。書籍 PDF をコミットしない（`.gitignore` が
+  `learning-lab/`, `*.pdf`, `books/` をカバー）。
+- 新しいテクニックを CI（またはローカルスイート）がカバーするよう、テストを追加する。
 
-## Adding a runtime
+## ランタイムの追加
 
-Add `src/adapters/<runtime>.ts` exposing `verify<Runtime>Technique(dir)` returning a
-`VerifyResult`, mirror the node/python adapters (positive run + mutation-based
-negative-sanity), detect it in `src/cli.ts`, and add a gated test.
+`src/adapters/<runtime>.ts` を追加し、`VerifyResult` を返す `verify<Runtime>Technique(dir)`
+を公開する。node/python アダプタを踏襲し（ポジティブ実行 + ミューテーションベースの
+ネガティブサニティ）、`src/cli.ts` で検出し、gate 付きのテストを追加する。
+
+## 言語について
+
+本リポジトリは**日本語を基本言語**とし、英語をマルチ言語対応として提供している
+（`README.md` / `README.en.md`、`docs/DEMO.md` / `docs/DEMO.en.md` など）。ドキュメントを
+更新する際は、可能であれば日本語版と英語版の両方を更新してほしい（片方だけでも歓迎——
+その旨を PR に書いてくれれば、もう片方は追従する）。

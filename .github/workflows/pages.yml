@@ -1,0 +1,48 @@
+name: Pages
+
+# ショーケース（site/index.html）を GitHub Pages に公開する。
+# PR ではアーティファクトのビルド（tar 化）まで行って壊れていないか検証し、
+# main への push でのみ実際にデプロイする。パブリックリポジトリなので Actions は無制限。
+#
+# 前提: リポジトリの Settings → Pages → Source を「GitHub Actions」にしておくこと
+# （未設定だと deploy ジョブだけが失敗する。build は Pages 未設定でも通る）。
+
+on:
+  push:
+    branches: [main]
+    paths: ['site/**', '.github/workflows/pages.yml']
+  pull_request:
+    branches: [main]
+    paths: ['site/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  # PR でも動く: site/ をアーティファクト化できるか検証（Pages 有効化に依存しない）
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  # main への push でのみ実デプロイ（Settings → Pages を「GitHub Actions」に設定済みが前提）
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
