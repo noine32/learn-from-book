@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="learn-from-book — 技術書を要約せず、各テクニックを実装し実行して検証する自己学習パイプライン。5ランタイム・25の検証済みテクニック。">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><text x="0" y="14" font-size="14">🧪</text></svg>'>
+<title>learn-from-book — 実行で検証する学習パイプライン</title>
+<style>
+  :root {
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", Roboto, Helvetica, Arial, sans-serif;
+
+    --ground: #eef1f0; --surface: #ffffff; --surface-2: #f6f8f7;
+    --ink: #14191c; --ink-soft: #515c62; --ink-faint: #7b868c;
+    --line: #d9e0dd; --line-strong: #c3ccc8;
+    --accent: #0d7a66; --accent-ink: #0a5c4d;
+    --pass: #0d7a66; --pass-bg: rgba(13,122,102,0.10);
+    --fail: #b0442b; --fail-bg: rgba(176,68,43,0.10);
+    --shadow: 0 1px 2px rgba(20,25,28,0.05), 0 8px 24px rgba(20,25,28,0.06);
+    --rt-node:#3f7a5a; --rt-python:#3a6890; --rt-go:#2b8598; --rt-rust:#a35d38; --rt-vba:#77772f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground:#0d1013; --surface:#161b1f; --surface-2:#1c2226;
+      --ink:#e7ece9; --ink-soft:#98a2a7; --ink-faint:#6b757a;
+      --line:#262d31; --line-strong:#333c41;
+      --accent:#35c2a6; --accent-ink:#4fd3ba;
+      --pass:#35c2a6; --pass-bg:rgba(53,194,166,0.13);
+      --fail:#e07a5f; --fail-bg:rgba(224,122,95,0.13);
+      --shadow:0 1px 2px rgba(0,0,0,0.3), 0 10px 30px rgba(0,0,0,0.35);
+      --rt-node:#6fb489; --rt-python:#6b9ec9; --rt-go:#4fbdd0; --rt-rust:#d18a63; --rt-vba:#b3b45c;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--font-sans); line-height:1.7; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:980px; margin:0 auto; padding:0 24px; }
+  a { color:var(--accent-ink); }
+  .mono { font-family:var(--font-mono); }
+  .eyebrow { font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-faint); }
+
+  header { border-bottom:1px solid var(--line); background: radial-gradient(120% 90% at 88% -10%, var(--pass-bg), transparent 60%), var(--surface); }
+  .topbar { display:flex; justify-content:flex-end; padding-top:20px; }
+  .lang { font-family:var(--font-mono); font-size:0.76rem; background:var(--surface-2); border:1px solid var(--line); border-radius:999px; padding:4px; display:inline-flex; gap:2px; }
+  .lang button { font-family:inherit; font-size:inherit; border:0; background:transparent; color:var(--ink-faint); padding:4px 12px; border-radius:999px; cursor:pointer; }
+  .lang button[aria-pressed="true"] { background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,0.08); }
+  .lang button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+  .hero { padding:26px 0 56px; }
+  .hero h1 { font-family:var(--font-mono); font-weight:700; font-size:clamp(2.1rem,6vw,3.4rem); letter-spacing:-0.02em; line-height:1.02; margin:14px 0 0; text-wrap:balance; }
+  .hero h1 .rev { color:var(--accent); }
+  .thesis { font-size:clamp(1.02rem,2.3vw,1.22rem); color:var(--ink-soft); max-width:56ch; margin:20px 0 0; }
+  .thesis b { color:var(--ink); font-weight:600; }
+  .stats { display:flex; flex-wrap:wrap; gap:14px; margin-top:34px; }
+  .stat { background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:12px 18px; min-width:120px; }
+  .stat .n { font-family:var(--font-mono); font-size:1.7rem; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; line-height:1; }
+  .stat .l { font-size:0.74rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint); margin-top:6px; }
+  .actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:30px; align-items:center; }
+  .btn { font-family:var(--font-mono); font-size:0.86rem; text-decoration:none; padding:10px 18px; border-radius:9px; border:1px solid transparent; display:inline-flex; align-items:center; gap:8px; transition:transform 0.12s ease; }
+  .btn.primary { background:var(--accent); color:#ffffff; }
+  @media (prefers-color-scheme: dark) { .btn.primary { color:#04241d; } }
+  .btn.ghost { background:transparent; color:var(--ink); border-color:var(--line-strong); }
+  .btn:hover { transform:translateY(-1px); }
+  .btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+  section { padding:60px 0; }
+  .section-head { margin-bottom:30px; }
+  .section-head h2 { font-family:var(--font-mono); font-size:1.28rem; font-weight:700; letter-spacing:-0.01em; margin:8px 0 0; text-wrap:balance; }
+  .section-head p { color:var(--ink-soft); margin:10px 0 0; max-width:60ch; }
+
+  .proof { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .proof-card { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:22px; box-shadow:var(--shadow); }
+  .proof-card .tag { font-family:var(--font-mono); font-size:0.72rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; display:inline-flex; align-items:center; gap:8px; padding:5px 10px; border-radius:999px; }
+  .proof-card.ok .tag { color:var(--pass); background:var(--pass-bg); }
+  .proof-card.no .tag { color:var(--fail); background:var(--fail-bg); }
+  .proof-card h3 { font-size:1rem; margin:14px 0 4px; }
+  .proof-card p { color:var(--ink-soft); font-size:0.92rem; margin:0 0 16px; }
+  .flow { display:flex; align-items:stretch; gap:8px; flex-wrap:wrap; }
+  .flow .step { font-family:var(--font-mono); font-size:0.76rem; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--ink-soft); display:flex; align-items:center; }
+  .flow .arrow { color:var(--ink-faint); align-self:center; font-family:var(--font-mono); }
+  .flow .result { font-family:var(--font-mono); font-size:0.76rem; font-weight:700; border-radius:8px; padding:8px 12px; display:flex; align-items:center; }
+  .ok .flow .result { color:var(--pass); background:var(--pass-bg); }
+  .no .flow .result { color:var(--fail); background:var(--fail-bg); }
+
+  .filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px; align-items:center; }
+  .filter { font-family:var(--font-mono); font-size:0.8rem; background:var(--surface); border:1px solid var(--line); color:var(--ink-soft); border-radius:999px; padding:7px 14px; cursor:pointer; display:inline-flex; align-items:center; gap:7px; transition:border-color 0.12s ease, color 0.12s ease; }
+  .filter:hover { color:var(--ink); border-color:var(--line-strong); }
+  .filter[aria-pressed="true"] { color:var(--ink); border-color:var(--accent); background:var(--pass-bg); }
+  .filter:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .filter .dot { width:9px; height:9px; border-radius:50%; background:var(--dot, var(--ink-faint)); }
+  .filter .ct { color:var(--ink-faint); font-variant-numeric:tabular-nums; }
+
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--rt); border-radius:12px; padding:15px 16px; box-shadow:var(--shadow); }
+  .card .top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .card .name { font-family:var(--font-mono); font-weight:700; font-size:0.94rem; color:var(--ink); }
+  .card .rt-chip { font-family:var(--font-mono); font-size:0.66rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--rt); background:color-mix(in srgb, var(--rt) 14%, transparent); padding:3px 8px; border-radius:999px; white-space:nowrap; }
+  .card .desc { color:var(--ink-soft); font-size:0.86rem; margin-top:8px; }
+  .card .check { margin-top:12px; font-family:var(--font-mono); font-size:0.72rem; color:var(--pass); display:flex; align-items:center; gap:6px; }
+  .card[hidden] { display:none; }
+
+  footer { border-top:1px solid var(--line); padding:40px 0 56px; color:var(--ink-soft); }
+  footer .row { display:flex; flex-wrap:wrap; gap:8px 20px; align-items:center; justify-content:space-between; }
+  footer .mono { font-size:0.82rem; }
+  .rt-legend { display:flex; flex-wrap:wrap; gap:14px; margin-top:18px; }
+  .rt-legend span { font-family:var(--font-mono); font-size:0.74rem; color:var(--ink-soft); display:inline-flex; gap:7px; align-items:center; }
+  .rt-legend i { width:9px; height:9px; border-radius:50%; display:inline-block; }
+
+  @media (max-width:760px) { .grid { grid-template-columns:1fr 1fr; } .proof { grid-template-columns:1fr; } }
+  @media (max-width:520px) { .grid { grid-template-columns:1fr; } }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="lang" id="lang" role="group" aria-label="Language">
+        <button data-lang="ja" aria-pressed="true">日本語</button>
+        <button data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+    <div class="hero">
+      <div class="eyebrow" data-en="Open source · MIT · Claude Code skill">オープンソース · MIT · Claude Code スキル</div>
+      <h1>learn&#8209;from&#8209;book<span class="rev">.</span></h1>
+      <p class="thesis" data-en="A learning pipeline that doesn't &lt;b&gt;summarize&lt;/b&gt; a programming book — it &lt;b&gt;implements&lt;/b&gt; each technique and &lt;b&gt;proves it by execution&lt;/b&gt;. A technique counts as learned only when its test passes and breaks the moment the code is mutated." data-html="1">技術書を<b>要約</b>するのではなく、各テクニックを<b>実装し、実行して証明する</b>学習パイプライン。テストが通り、かつ<b>実装をミューテーションした瞬間に壊れて</b>初めて「習得」とみなす。</p>
+      <div class="stats">
+        <div class="stat"><div class="n">5</div><div class="l" data-en="Runtimes">ランタイム</div></div>
+        <div class="stat"><div class="n">25</div><div class="l" data-en="Verified techniques">検証済み技術</div></div>
+        <div class="stat"><div class="n">100%</div><div class="l" data-en="By execution">実行で検証</div></div>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="https://github.com/noine32/learn-from-book" data-en="View on GitHub ↗">GitHub で見る ↗</a>
+        <a class="btn ghost mono" href="https://github.com/noine32/learn-from-book/blob/main/docs/DEMO.md">docs/DEMO.md</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow" data-en="The §6 check">§6 検証</div>
+      <h2 data-en="Why &quot;the test passed&quot; isn't enough">なぜ「テストが通る」だけでは不十分か</h2>
+      <p data-en="When one agent writes both the code and its test, it can quietly write a test that passes without checking anything. The harness defends against that: after the test passes, it mutates the implementation and re-runs. A real test breaks; a hollow one doesn't.">コードとテストを同じエージェントが書くと、何も検証しないのに通るテストをこっそり書けてしまう。ハーネスはこれを防ぐ：テストが通った後、実装をミューテーションして再実行する。本物のテストは壊れ、空虚なテストは壊れない。</p>
+    </div>
+    <div class="proof">
+      <div class="proof-card ok">
+        <span class="tag" data-en="✓ Verified">&#10003; 検証</span>
+        <h3 data-en="Genuine technique">本物のテクニック</h3>
+        <p data-en="The test imports and exercises the implementation, so breaking the code breaks the test.">テストが実装を import・使用しているので、コードを壊せばテストも壊れる。</p>
+        <div class="flow">
+          <span class="step" data-en="impl">実装</span>
+          <span class="arrow">&rarr;</span>
+          <span class="step" data-en="mutate → throws">ミューテーション → 例外</span>
+          <span class="arrow">&rarr;</span>
+          <span class="result" data-en="test FAILS → kept">テスト失敗 → 採用</span>
+        </div>
+      </div>
+      <div class="proof-card no">
+        <span class="tag" data-en="✗ Rejected">&#10007; 棄却</span>
+        <h3 data-en="Tautological / echo test">トートロジー / echo テスト</h3>
+        <p data-en="The test asserts a hardcoded value and never touches the implementation — so mutation changes nothing.">テストがハードコード値を assert するだけで実装に触れない → ミューテーションしても何も変わらない。</p>
+        <div class="flow">
+          <span class="step" data-en="impl">実装</span>
+          <span class="arrow">&rarr;</span>
+          <span class="step" data-en="mutate → throws">ミューテーション → 例外</span>
+          <span class="arrow">&rarr;</span>
+          <span class="result" data-en="test still PASSES → dropped">テスト成功のまま → 棄却</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:12px;">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow" data-en="Verified techniques">検証済み技術</div>
+      <h2 data-en="Five runtimes, one standard of proof">5つのランタイム、同じ証明基準</h2>
+      <p data-en="Every card below ran through the harness — test executed, then mutation-checked. Filter by runtime to scan.">以下のカードはすべてハーネスを通過：テスト実行 → ミューテーション検証。ランタイムで絞り込めます。</p>
+    </div>
+    <div class="filters" id="filters">
+      <button class="filter" data-rt="all" aria-pressed="true"><span data-en="All">すべて</span> <span class="ct" id="ct-all"></span></button>
+      <button class="filter" data-rt="node" style="--dot:var(--rt-node)" aria-pressed="false"><span class="dot"></span>node · vitest <span class="ct" id="ct-node"></span></button>
+      <button class="filter" data-rt="python" style="--dot:var(--rt-python)" aria-pressed="false"><span class="dot"></span>python · pytest <span class="ct" id="ct-python"></span></button>
+      <button class="filter" data-rt="go" style="--dot:var(--rt-go)" aria-pressed="false"><span class="dot"></span>go · go&nbsp;test <span class="ct" id="ct-go"></span></button>
+      <button class="filter" data-rt="rust" style="--dot:var(--rt-rust)" aria-pressed="false"><span class="dot"></span>rust · cargo <span class="ct" id="ct-rust"></span></button>
+      <button class="filter" data-rt="vba" style="--dot:var(--rt-vba)" aria-pressed="false"><span class="dot"></span>excel-vba · COM <span class="ct" id="ct-vba"></span></button>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <span class="mono" data-en="learn-from-book — verified by execution, not summary.">learn-from-book — 要約ではなく実行で検証。</span>
+      <span class="mono"><a href="https://github.com/noine32/learn-from-book">github.com/noine32/learn-from-book</a></span>
+    </div>
+    <div class="rt-legend">
+      <span><i style="background:var(--rt-node)"></i>node / TypeScript</span>
+      <span><i style="background:var(--rt-python)"></i>Python</span>
+      <span><i style="background:var(--rt-go)"></i>Go</span>
+      <span><i style="background:var(--rt-rust)"></i>Rust</span>
+      <span><i style="background:var(--rt-vba)"></i>Excel / VBA</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const RT = {
+    node:{label:"node",color:"var(--rt-node)"}, python:{label:"python",color:"var(--rt-python)"},
+    go:{label:"go",color:"var(--rt-go)"}, rust:{label:"rust",color:"var(--rt-rust)"}, vba:{label:"excel-vba",color:"var(--rt-vba)"},
+  };
+  // [runtime, name, descJa, descEn]
+  const DATA = [
+    ["node","debounce","静かになってから一度だけ実行","fire once after the quiet window"],
+    ["node","every","全要素が述語を満たすか","all elements satisfy a predicate"],
+    ["node","flatten","ネストを1段ぶん連結","concatenate one level of nesting"],
+    ["node","range","刻み付きの数列（両端含む）","inclusive numeric sequence with step"],
+    ["node","deepEqual","値による構造的等価","structural equality by value"],
+    ["node","binarySearch","目的値の位置、無ければ −1","index of a target, or −1"],
+    ["node","gcd","最大公約数（ユークリッド）","greatest common divisor (Euclid)"],
+    ["node","isPalindrome","大小・記号を無視した回文判定","case & punctuation insensitive"],
+    ["node","memoize","引数ごとに結果をキャッシュ","cache results per argument"],
+    ["python","is_anagram","大小無視のアナグラム判定","case-insensitive anagram check"],
+    ["python","word_frequency","単語 → 出現数のマップ","word → count map"],
+    ["python","fib","n番目のフィボナッチ（反復）","nth Fibonacci (iterative)"],
+    ["python","collatz","1に到達するまでの手数","steps to reach 1"],
+    ["python","comma_code","「a, b, and c」に整形","join as “a, b, and c”"],
+    ["python","caesar","シーザー暗号のシフト","Caesar cipher shift"],
+    ["go","ReverseString","UTF-8文字列を反転","reverse a UTF-8 string"],
+    ["go","Sum","intスライスの合計","sum of an int slice"],
+    ["rust","reverse_string","文字列を反転","reverse a string"],
+    ["rust","sum","i32スライスの合計","sum of an i32 slice"],
+    ["vba","ReverseString","文字列を反転（純粋関数）","reverse a string (pure function)"],
+    ["vba","GetEndRow","列の最終データ行（Range）","last data row in a column (Range)"],
+    ["vba","SortArray1D","昇順ソート（Variant配列）","ascending sort (Variant array)"],
+    ["vba","UniqueArray1D","重複除去・初出順","distinct values, first-seen order"],
+    ["vba","SumMatrix","2次元配列の総和","sum of a 2-D array"],
+    ["vba","DoubleRange","各セルを2倍（Sub副作用）","double each cell in place (Sub side effect)"],
+  ];
+  const CHECK = { ja: "検証済み", en: "verified" };
+
+  const grid = document.getElementById("grid");
+  const cardEls = [];
+  for (const [rt, name, dj, de] of DATA) {
+    const el = document.createElement("article");
+    el.className = "card"; el.dataset.rt = rt; el.style.setProperty("--rt", RT[rt].color);
+    el.innerHTML = '<div class="top"><span class="name"></span><span class="rt-chip"></span></div><div class="desc" data-ja="" data-en=""></div><div class="check">&#10003; <span class="cktxt"></span></div>';
+    el.querySelector(".name").textContent = name;
+    el.querySelector(".rt-chip").textContent = RT[rt].label;
+    const d = el.querySelector(".desc"); d.dataset.ja = dj; d.dataset.en = de;
+    grid.appendChild(el); cardEls.push(el);
+  }
+  const counts = { all: DATA.length };
+  for (const [rt] of DATA) counts[rt] = (counts[rt] || 0) + 1;
+  for (const k of Object.keys(counts)) { const n = document.getElementById("ct-"+k); if (n) n.textContent = counts[k]; }
+
+  function applyLang(lang) {
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-en]").forEach((el) => {
+      if (el.dataset.ja === undefined) el.dataset.ja = el.dataset.html ? el.innerHTML : el.textContent;
+      const val = lang === "en" ? el.dataset.en : el.dataset.ja;
+      if (el.dataset.html) el.innerHTML = val; else el.textContent = val;
+    });
+    cardEls.forEach((el) => { el.querySelector(".desc").textContent = el.querySelector(".desc").dataset[lang]; });
+    document.querySelectorAll(".cktxt").forEach((s) => (s.textContent = CHECK[lang]));
+    document.querySelectorAll("#lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  }
+  document.getElementById("lang").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (b) applyLang(b.dataset.lang);
+  });
+  const filters = document.getElementById("filters");
+  filters.addEventListener("click", (e) => {
+    const btn = e.target.closest(".filter"); if (!btn) return;
+    const rt = btn.dataset.rt;
+    filters.querySelectorAll(".filter").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+    cardEls.forEach((c) => { c.hidden = rt !== "all" && c.dataset.rt !== rt; });
+  });
+  applyLang("ja");
+</script>
+</body>
+</html>

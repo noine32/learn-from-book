@@ -1,0 +1,23 @@
+version: 2
+updates:
+  # npm 依存（Node ランタイム / ハーネス）
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore(deps)
+    groups:
+      # 開発依存はまとめて1 PR にして CI 消費を抑える
+      dev-dependencies:
+        dependency-type: development
+
+  # GitHub Actions 自体のバージョン更新（actions/checkout など）
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci(deps)
