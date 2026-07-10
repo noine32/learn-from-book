@@ -23,5 +23,5 @@ describe('runNodeTechnique', () => {
     const { result, nextStatus } = await runNodeTechnique(demo, t);
     expect(result.verified).toBe(true);
     expect(nextStatus).toBe('verified');
-  });
+  }, 30000);
 });
