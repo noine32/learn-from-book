@@ -44,6 +44,17 @@ npx tsx src/cli.ts demo/js-deep-equal
 npx tsx src/cli.ts demo/py-fib
 ```
 
+## Go runtime (`go.mod` + `impl.go` + `impl_test.go`, verified with `go test`)
+
+| Technique | What it does | Verified |
+|-----------|--------------|----------|
+| `demo/go-reverse` | ReverseString(s): reverse a UTF‑8 string | ✅ |
+| `demo/go-sum` | Sum(nums): sum of an int slice | ✅ |
+
+```bash
+npx tsx src/cli.ts demo/go-sum
+```
+
 ## Excel/VBA runtime (Windows-only; `impl.bas` + `cases.json`)
 
 | Technique | What it does | Verified |
