@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { mutateBas, verifyVbaTechnique } from '../../src/adapters/excel-vba.ts';
@@ -9,6 +10,23 @@ const demoCells = join(here, '..', '..', 'demo', 'vba-get-end-row');
 const demoSort = join(here, '..', '..', 'demo', 'vba-sort-array');
 const demoUnique = join(here, '..', '..', 'demo', 'vba-unique-array');
 const isWin = process.platform === 'win32';
+
+// Excel COM が登録されているか（ProgID チェックのみ・Excelは起動しない）。
+// GitHub の windows runner は Excel 未搭載なので、COM テストはここで skip される。
+function excelComAvailable(): boolean {
+  if (!isWin) return false;
+  try {
+    execFileSync(
+      'powershell.exe',
+      ['-NoProfile', '-Command', "if ([Type]::GetTypeFromProgID('Excel.Application')) { exit 0 } else { exit 1 }"],
+      { stdio: 'ignore', timeout: 30000, windowsHide: true },
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+const runVbaCom = excelComAvailable();
 
 describe('mutateBas', () => {
   it('replaces the target function body with a sentinel', () => {
@@ -21,7 +39,7 @@ describe('mutateBas', () => {
 });
 
 // Excel COM を実走するため Windows のみ。COM を2回起動するので時間がかかる。
-describe.runIf(isWin)('verifyVbaTechnique (Windows / Excel COM)', () => {
+describe.runIf(runVbaCom)('verifyVbaTechnique (Windows / Excel COM)', () => {
   it('verifies the VBA reverse demo end-to-end', async () => {
     const r = await verifyVbaTechnique(demo);
     expect(r.verified).toBe(true);

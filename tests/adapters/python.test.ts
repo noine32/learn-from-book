@@ -28,7 +28,7 @@ describe('python static checks', () => {
 });
 
 describe.runIf(hasPytest)('python runtime demos', () => {
-  for (const name of ['py-anagram', 'py-word-frequency', 'py-fib']) {
+  for (const name of ['py-anagram', 'py-word-frequency', 'py-fib', 'py-collatz', 'py-comma-code', 'py-caesar']) {
     it(`verifies ${name} end-to-end`, async () => {
       const r = await verifyPythonTechnique(demoDir(name));
       expect(r.verified).toBe(true);

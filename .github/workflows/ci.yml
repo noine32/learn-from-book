@@ -8,9 +8,14 @@ on:
 
 jobs:
   test:
-    # Node + Python test suite. The excel-vba tests require Windows + Excel COM and
-    # are intentionally not run in CI (they self-skip on non-Windows).
-    runs-on: ubuntu-latest
+    # Node + Python + Go + Rust across Linux and Windows. The Excel/VBA COM tests
+    # self-skip where Excel isn't available (all CI runners), so they only run on a
+    # local Windows machine with Excel installed.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,4 +31,4 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: npm ci
       - run: npm run typecheck
-      - run: npm run test:node
+      - run: npm test

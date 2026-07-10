@@ -39,6 +39,9 @@ npx tsx src/cli.ts demo/js-deep-equal
 | `demo/py-anagram` | is_anagram(a, b): case-insensitive anagram check | ✅ |
 | `demo/py-word-frequency` | word_frequency(text): word → count dict | ✅ |
 | `demo/py-fib` | fib(n): nth Fibonacci number (iterative) | ✅ |
+| `demo/py-collatz` | collatz(n): steps to reach 1 | ✅ |
+| `demo/py-comma-code` | comma_code(items): "a, b, and c" | ✅ |
+| `demo/py-caesar` | caesar(text, shift): Caesar cipher | ✅ |
 
 ```bash
 npx tsx src/cli.ts demo/py-fib
