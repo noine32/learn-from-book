@@ -1,81 +1,88 @@
 # learn-from-book
 
 [![CI](https://github.com/noine32/learn-from-book/actions/workflows/ci.yml/badge.svg)](https://github.com/noine32/learn-from-book/actions/workflows/ci.yml)
+[![Compat](https://github.com/noine32/learn-from-book/actions/workflows/compat.yml/badge.svg)](https://github.com/noine32/learn-from-book/actions/workflows/compat.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)
 
-An experiential learning pipeline for AI coding agents: read a programming book,
-**implement each technique, verify it by running a test, and only then accumulate it**
-as a reusable skill. The goal is to move past "I read it" to "I verified I understand it."
+**日本語** | [English](./README.en.md)
 
-The core is an **objective verification harness** (`src/verify.ts`): a technique is
-`verified` only if its test (a) imports the implementation, (b) has at least one
-assertion, and (c) **fails when the implementation is mutated** (every export replaced
-with a throwing stub). This rejects tautological / echo tests that pass without actually
-exercising the code.
+AIコーディングエージェントのための「体験的」学習パイプライン。技術書を読み、
+**各テクニックを実装し、テストを実行して検証し、そのうえで初めて再利用可能なスキルとして蓄積する**。
+「読んだ」で止めず「理解したことを検証した」まで到達することを狙う。
 
-## ⚠️ Safety: review generated code before running
+中核は**客観的な検証ハーネス**（`src/verify.ts`）。あるテクニックが `verified` になるのは、
+そのテストが (a) 実装を import し、(b) 最低1つの assertion を持ち、
+(c) **実装をミューテーション（各 export を例外を投げるスタブに置換）すると失敗する**
+——この3条件をすべて満たしたときだけ。これにより、コードを実際に動かさなくても通ってしまう
+トートロジー／echo テストを棄却する。
 
-This tool runs code that an agent generates from book techniques. The per-technique
-work directory is **directory-isolated, not execution-isolated** — generated Node/test
-code runs with your user permissions and can access the network, environment variables,
-and filesystem. **Review generated code before running it.** Prefer a network-restricted
-environment and an allow-listed set of packages.
+🔎 **ライブデモ（ショーケース）:** https://noine32.github.io/learn-from-book/
 
-## What is / isn't in this repo
+## ⚠️ 安全性: 生成コードは実行前にレビューする
 
-- **In (public):** the orchestrator skill (`skills/learn-from-book/SKILL.md`), the verification harness and
-  runtime adapters (`src/`), tests, and a self-authored copyright-free demo (`demo/`).
-- **Never in (keep private):** book PDFs or their text, the per-technique skills/knowledge
-  learned from a book (they can be derivative works), and your `learning-lab/` outputs.
-  These are git-ignored.
+本ツールは、書籍のテクニックからエージェントが生成したコードを実行する。テクニックごとの作業
+ディレクトリは**ディレクトリ分離であって実行分離ではない**——生成された Node／テストコードは
+あなたのユーザー権限で動き、ネットワーク・環境変数・ファイルシステムにアクセスできる。
+**実行前に生成コードをレビューすること。** ネットワーク制限された環境と、許可リスト方式の
+パッケージ構成を推奨する。
 
-## Requirements
+## このリポジトリに含むもの／含まないもの
+
+- **含む（公開）:** オーケストレーター skill（`skills/learn-from-book/SKILL.md`）、検証ハーネスと
+  ランタイムアダプタ（`src/`）、テスト、自作の著作権フリーなデモ（`demo/`）。
+- **絶対に含めない（非公開のまま）:** 書籍PDFやその本文、書籍から学んだテクニックごとの
+  skill／知識（二次的著作物になりうる）、あなたの `learning-lab/` 出力。これらは git-ignore 済み。
+
+## 必要環境
 
 - Node 22+
 - `npm install`
 
-## Usage
+## 使い方
 
 ```bash
 npm install
-npm test                                  # run the harness's own test suite
+npm test                                  # ハーネス自身のテストスイートを実行
 
-# verify one technique directory (runtime auto-detected)
-npx tsx src/cli.ts demo/debounce      # node technique (impl.ts + impl.test.ts)
-npx tsx src/cli.ts demo/py-fib        # Python technique (impl.py + test_impl.py), pytest
-npx tsx src/cli.ts demo/vba-reverse   # VBA technique (impl.bas + cases.json), Windows/Excel only
+# テクニックのディレクトリを1つ検証（ランタイムは自動判定）
+npx tsx src/cli.ts demo/debounce      # node テクニック（impl.ts + impl.test.ts）
+npx tsx src/cli.ts demo/py-fib        # Python テクニック（impl.py + test_impl.py）, pytest
+npx tsx src/cli.ts demo/vba-reverse   # VBA テクニック（impl.bas + cases.json）, Windows/Excel のみ
 ```
 
-`src/cli.ts` prints a `VerifyResult` JSON and exits 0 when `verified`, 1 otherwise.
+`src/cli.ts` は `VerifyResult` の JSON を出力し、`verified` なら終了コード 0、そうでなければ 1 を返す。
 
-A technique's test must follow the §6 rules (see `skills/learn-from-book/SKILL.md`): import `./impl`, assert at
-least once, and genuinely exercise the implementation (the harness mutates the impl and
-requires the test to then fail).
+テクニックのテストは §6 のルール（`skills/learn-from-book/SKILL.md` 参照）に従う必要がある:
+`./impl` を import し、最低1回 assert し、実装を実際に動かすこと（ハーネスは実装をミューテーション
+して、テストがそこで失敗することを要求する）。
 
-## Demos
+## デモ
 
-See [`docs/DEMO.md`](docs/DEMO.md) for verified techniques across all three runtimes
-(Node/TypeScript, Python/pytest, and Excel/VBA), each verified by execution.
+3つ以上のランタイム（Node/TypeScript, Python/pytest, Go, Rust, Excel/VBA）にわたる検証済み
+テクニックは [`docs/DEMO.md`](docs/DEMO.md) を参照。いずれも**実行によって検証**されている。
 
-## Install as a Claude Code plugin
+## Claude Code プラグインとして導入
 
-The orchestrator skill lives at `skills/learn-from-book/SKILL.md`. You can add this
-repo as a single-plugin marketplace:
+オーケストレーター skill は `skills/learn-from-book/SKILL.md` にある。本リポジトリを
+単一プラグインのマーケットプレイスとして追加できる:
 
 ```
 /plugin marketplace add noine32/learn-from-book
 /plugin install learn-from-book@learn-from-book
 ```
 
-## Status
+## ステータス
 
-- **Node runtime:** working.
-- **Python runtime:** working — runs `test_impl.py` with pytest and applies the same mutation-based negative-sanity check.
-- **Excel/VBA runtime (Windows-only):** working — injects a `.bas` into a fresh Excel
-  instance via COM, runs cases with `Application.Run`, and applies the same
-  mutation-based negative-sanity check. Cleans up only its own Excel instance.
+- **Node ランタイム:** 動作。
+- **Python ランタイム:** 動作——`test_impl.py` を pytest で実行し、同じミューテーションベースの
+  ネガティブサニティチェックを適用。
+- **Go ランタイム:** 動作——`go test` で実行し、関数本体を `panic("MUTATED")` に置換して検証。
+- **Rust ランタイム:** 動作——`cargo test` で実行し、`pub fn` 本体を `panic!("MUTATED")` に置換して検証。
+- **Excel/VBA ランタイム（Windows 専用）:** 動作——COM で新しい Excel インスタンスに `.bas` を注入し、
+  `Application.Run` でケースを実行し、同じミューテーションベースのネガティブサニティチェックを適用。
+  自分が起動した Excel インスタンスだけをクリーンアップする。
 
-## License
+## ライセンス
 
 MIT
