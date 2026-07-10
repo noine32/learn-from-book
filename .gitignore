@@ -5,3 +5,5 @@ books/
 *.fugu-review.md
 *.mutated.bas
 
+__pycache__/
+*.pyc
