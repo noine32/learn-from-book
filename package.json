@@ -9,7 +9,8 @@
     "test": "vitest run",
     "test:node": "vitest run tests/ledger.test.ts tests/verify.test.ts tests/adapters/node.test.ts tests/adapters/python.test.ts tests/adapters/go.test.ts tests/adapters/rust.test.ts tests/adapters/run-ps1-ascii.test.ts tests/demos/",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "gen:demo": "node scripts/gen-demo.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.7.0",

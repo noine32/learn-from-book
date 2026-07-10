@@ -2,6 +2,8 @@
 
 [日本語](./DEMO.md) | **English**
 
+<!-- This file is generated from docs/demos.json by scripts/gen-demo.mjs. Do not edit by hand; run `npm run gen:demo`. -->
+
 Each technique below was run through `learn-from-book`'s verification harness
 (`src/verify.ts` for node, `src/adapters/run.ps1` for VBA). "Verified" means the
 technique's test **passed** AND survived the §6 checks: it imports/exercises the
@@ -27,8 +29,6 @@ copied. VBA techniques are standard Excel idioms.
 | `demo/js-gcd` | gcd(a, b): greatest common divisor (Euclid) | ✅ |
 | `demo/js-is-palindrome` | isPalindrome(s): case/punctuation-insensitive | ✅ |
 | `demo/js-memoize` | memoize(fn): cache results per argument | ✅ |
-
-Run any of them:
 
 ```bash
 npx tsx src/cli.ts demo/js-deep-equal
